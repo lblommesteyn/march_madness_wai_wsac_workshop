@@ -20,6 +20,38 @@ cells = []
 
 
 cells.extend([
+    code(
+        """
+        # Colab setup cell: if you opened this notebook from GitHub in Colab, run this first.
+        import os
+        import shutil
+        import subprocess
+        import sys
+        from pathlib import Path
+
+        REPO_URL = "https://github.com/lblommesteyn/march_madness_wai_wsac_workshop.git"
+        REPO_DIR = Path("/content/march_madness_wai_wsac_workshop")
+
+        def run_cmd(cmd, cwd=None):
+            print("$", " ".join(cmd))
+            subprocess.run(cmd, check=True, cwd=cwd)
+
+        if "google.colab" in sys.modules:
+            run_cmd(["apt-get", "-qq", "update"])
+            run_cmd(["apt-get", "-qq", "install", "git-lfs"])
+            run_cmd(["git", "lfs", "install"])
+            if REPO_DIR.exists():
+                shutil.rmtree(REPO_DIR)
+            run_cmd(["git", "clone", REPO_URL, str(REPO_DIR)])
+            run_cmd(["git", "lfs", "pull"], cwd=REPO_DIR)
+            os.chdir(REPO_DIR)
+            print("Colab repo setup complete.")
+        else:
+            print("Colab setup skipped because this notebook is not running in Google Colab.")
+
+        print("Working directory:", Path.cwd())
+        """
+    ),
     md(
         """
         # March Madness 2026 Workshop Notebook
