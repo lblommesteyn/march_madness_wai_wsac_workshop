@@ -20,6 +20,52 @@ nb["metadata"]["kernelspec"] = {
 nb["metadata"]["language_info"] = {"name": "python", "pygments_lexer": "ipython3"}
 
 cells = [
+    code(
+        """
+        # Colab setup cell: run this first if you opened the notebook from GitHub in Colab.
+        import os
+        import subprocess
+        import sys
+        from pathlib import Path
+
+        REPO_URL = "https://github.com/lblommesteyn/march_madness_wai_wsac_workshop.git"
+        REPO_DIR = Path("/content/march_madness_wai_wsac_workshop")
+
+        def run_cmd(cmd, cwd=None, check=True):
+            print("$", " ".join(cmd))
+            result = subprocess.run(cmd, cwd=cwd, text=True, capture_output=True)
+            if result.stdout:
+                print(result.stdout.strip())
+            if result.stderr:
+                print(result.stderr.strip())
+            if check and result.returncode != 0:
+                raise RuntimeError(f"Command failed with exit code {result.returncode}: {' '.join(cmd)}")
+            return result
+
+        def git_lfs_available():
+            return run_cmd(["git", "lfs", "version"], check=False).returncode == 0
+
+        if "google.colab" in sys.modules:
+            if not git_lfs_available():
+                run_cmd(["apt-get", "-qq", "update"])
+                run_cmd(["apt-get", "-qq", "install", "git-lfs"])
+            if REPO_DIR.exists():
+                print(f"Repo already exists at {REPO_DIR}, refreshing it.")
+                run_cmd(["git", "pull"], cwd=REPO_DIR, check=False)
+            else:
+                run_cmd(["git", "clone", REPO_URL, str(REPO_DIR)])
+            if git_lfs_available():
+                run_cmd(["git", "lfs", "pull"], cwd=REPO_DIR, check=False)
+            else:
+                print("Warning: git-lfs is unavailable, so large files may not download.")
+            os.chdir(REPO_DIR)
+            print("Colab repo setup complete.")
+        else:
+            print("Colab setup skipped because this notebook is not running in Google Colab.")
+
+        print("Working directory:", Path.cwd())
+        """
+    ),
     md(
         """
         # March Madness Model Lab: Men + Women
