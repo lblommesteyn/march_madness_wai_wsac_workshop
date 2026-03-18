@@ -29,6 +29,7 @@ cells.extend([
         from pathlib import Path
 
         REPO_URL = "https://github.com/lblommesteyn/march_madness_wai_wsac_workshop.git"
+        STABLE_DIR = Path("/content")
         REPO_DIR = Path("/content/march_madness_wai_wsac_workshop")
 
         def run_cmd(cmd, cwd=None, check=True):
@@ -46,14 +47,19 @@ cells.extend([
             return run_cmd(["git", "lfs", "version"], check=False).returncode == 0
 
         if "google.colab" in sys.modules:
+            STABLE_DIR.mkdir(parents=True, exist_ok=True)
+            os.chdir(STABLE_DIR)
             if not git_lfs_available():
                 run_cmd(["apt-get", "-qq", "update"])
                 run_cmd(["apt-get", "-qq", "install", "git-lfs"])
+            if REPO_DIR.exists() and not (REPO_DIR / ".git").exists():
+                print(f"Removing incomplete repo directory at {REPO_DIR}.")
+                subprocess.run(["rm", "-rf", str(REPO_DIR)], check=False)
             if REPO_DIR.exists():
                 print(f"Repo already exists at {REPO_DIR}, refreshing it.")
                 run_cmd(["git", "pull"], cwd=REPO_DIR, check=False)
             else:
-                run_cmd(["git", "clone", REPO_URL, str(REPO_DIR)])
+                run_cmd(["git", "clone", REPO_URL, str(REPO_DIR)], cwd=STABLE_DIR)
             if git_lfs_available():
                 run_cmd(["git", "lfs", "pull"], cwd=REPO_DIR, check=False)
             else:
